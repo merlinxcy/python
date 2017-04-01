@@ -58,7 +58,7 @@ def server_loop():
     if not len(target):
         target="0.0.0.0"
     server=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-    server=bind((target,port))
+    server.bind((target,port))
     server.listen(5)
     while True:
         client_socket,addr=server.accept()
@@ -144,7 +144,7 @@ def main():
         #send data
         client_sender(buffer)
         #main fun gooooo
-        if listen:
+    if listen:
            server_loop()
 
 
