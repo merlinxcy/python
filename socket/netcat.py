@@ -1,5 +1,8 @@
 #Version one beta
 #made by xeldax
+#-*-coding:UTF-8-*-
+#-*- coding:gb2312 -*-
+#-*- coding:GBK -*-
 import sys
 import socket
 import getopt
@@ -28,7 +31,7 @@ def usage():
     print "echo 'ABCDEFGHI' | ./netcat.py -t 192.168.0.1 -p 135"
     print 
     sys.exit(0)
-#client_sender
+#client_sender 
 def client_sender(buffer):
     client=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
     try:
@@ -68,7 +71,7 @@ def server_loop():
 def run_command(command):
     command=command.rstrip()
     try:
-        output=subprocess.check_output(command,stderr=subprocess.STDOUT,shell=True)
+        output=subprocess.check_output(command,stderr=subprocess.STDOUT,shell=True)#to create a command shell
     except:
         output="Failed to execute command.\r\n"
     return output
@@ -77,7 +80,7 @@ def client_handler(client_socket):
     global upload
     global execute
     global command
-    if len(upload_destination):
+    if len(upload_destination):#when file option is choose
        file_buffer=""
        while True:
           data=client_socket.recv(1024)
@@ -86,13 +89,13 @@ def client_handler(client_socket):
           else:
               file_buffer+=data
        try:
-           file_descriptor=open(upload_destination,"wb")
+           file_descriptor=open(upload_destination,"wb")#create a file buffer on the local
            file_descriptor=write(file_buffer)
            file_descriptor.close()
            client_socket.send("Successfully saced file to %s\r\n" % upload_destination)
        except:
            client_socket.send("Failed to sace file")
-    if len(execute):
+    if len(execute):#when command option is choice
         output=run_command(execute)
         client_socket.send(output)
     if command:
@@ -100,7 +103,7 @@ def client_handler(client_socket):
           client_socket.send("<BHP:#> ")
           cmd_buffer=""
           while "\n" not in cmd_buffer:
-              cmd_buffer+=client_socket.recv(1024)
+               cmd_buffer+=client_socket.recv(1024)
           response=run_command(cmd_buffer)
           client_socket.send(response)
 
