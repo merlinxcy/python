@@ -1,0 +1,321 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#define MAXLINE 80
+#define SERV_PORT 8000
+int main(int argc,char * argv[])
+{
+	struct sockaddr_in servaddr;
+	char buf[MAXLINE];
+	int sockfd,n;
+	char *str;
+	if(argc!=2)
+	{
+		fputs("usage: ./client message\n",stderr);
+		exit(1);
+	}
+	str=argv[1];
+	sockfd=socket(AF_INET,SOCK_STREAM,0);
+	bzero(&servaddr,sizeof(servaddr));
+	servaddr.sin_family=AF_INET;
+	inet_pton(AF_INET,"127.0.0.1",&servaddr.sin_addr);
+	servaddr.sin_port=htons(SERV_PORT);
+	connect(sockfd,(struct sockaddr *)&servaddr,sizeof(servaddr));
+	write(sockfd,str,strlen(str));
+	n=read(sockfd,buf,MAXLINE);
+	printf("Response from server:\n");
+	write(STDOUT_FILENO,buf,n);
+	close(sockfd);
+	return 0;
+}
+
+
+
+
+
+
+
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <ctype.h>//the file include the toupper()
+#define MAXLINE 80
+#define SERV_PORT 8000
+int main()
+{
+	struct sockaddr_in servaddr,cliaddr;
+	socklen_t cliaddr_len;
+	int listenfd,connfd;
+	char buf[MAXLINE];
+	char str[INET_ADDRSTRLEN];
+	int i,n;
+	listenfd=socket(AF_INET,SOCK_STREAM,0);
+	bzero(&servaddr,sizeof(servaddr));
+	servaddr.sin_family=AF_INET;
+	servaddr.sin_addr.s_addr=htonl(INADDR_ANY);
+	servaddr.sin_port=htons(SERV_PORT);
+	bind(listenfd,(struct sockaddr *)&servaddr,sizeof(servaddr));
+	listen(listenfd,20);
+	printf("Accepting connections......\n" );
+	while(1)
+	{
+		cliaddr_len=sizeof(cliaddr);
+		connfd=accept(listenfd,(struct sockaddr *)&cliaddr,&cliaddr_len);
+		n=read(connfd,buf,MAXLINE);
+		printf("received from %s at PORT %d\n",inet_ntop(AF_INET,&cliaddr.sin_addr,str,sizeof(str)),ntohs(cliaddr.sin_port));
+		for(i=0;i<n;i++)
+		buf[i]=toupper(buf[i]);
+		write(connfd,buf,n);
+		close(connfd);		
+	}
+}
+
+
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <string.h>
+#include <netdb.h>
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <unistd.h>
+#define SERVPORT 3333
+#define MAXDATASIZE 100
+int main(int argc,char * argv[])
+{
+	int sockfd,recvbytes;
+	char buf[MAXDATASIZE];
+	struct hostent *host;
+	struct sockaddr_in serv_addr;
+	if (argc<2)
+	{
+		fprintf(stderr,"Please enter the server's hostname\n");
+		exit(1);
+	}
+	if((host=gethostbyname(argv[1]))==NULL)
+	{
+		herror("gethostbyname");
+		exit(1);
+	}
+	if((sockfd=socket(AF_INET,SOCK_STREAM,0))==-1)
+	{
+		perror("socket create error!");
+		exit(1);
+	}
+	serv_addr.sin_family=AF_INET;
+	serv_addr.sin_port=htons(SERVPORT);
+	serv_addr.sin_addr=*((struct in_addr *)host->h_addr);
+	bzero(&(serv_addr.sin_zero),8);
+	if(connect(sockfd,(struct sockaddr *)&serv_addr,sizeof(struct sockaddr))==-1)
+	{
+		perror("connect error");
+		exit(1);
+	}
+	if((recvbytes=recv(sockfd,buf,MAXDATASIZE,0))==-1)
+	{
+		perror("connect error");
+		exit(1);
+	}
+	buf[recvbytes]='\0';
+	printf("recv: %s",buf);
+	close(sockfd);
+}
+
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <string.h>
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <sys/wait.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+#define SERVPORT 3333
+#define BACKLOG 10
+int main()
+{
+	int sockfd,client_fd;
+	struct sockaddr_in my_addr;
+	struct sockaddr_in remote_addr;
+	int sin_size;
+	if((sockfd=socket(AF_INET,SOCK_STREAM,0))==-1)
+	{
+		perror("socket create failed");
+		exit(1);
+	}
+	my_addr.sin_family=AF_INET;
+	my_addr.sin_port=htons(SERVPORT);
+	my_addr.sin_addr.s_addr=INADDR_ANY;
+	bzero(&(my_addr.sin_zero),8);
+	if(bind(sockfd,(struct sockaddr*)&my_addr,sizeof(struct sockaddr))==-1)
+	{
+		perror("bind error");
+		exit(1);
+	}
+	if(listen(sockfd,BACKLOG)==-1)
+	{
+		perror("listen error");
+		exit(1);
+	}
+	while(1)
+	{
+		sin_size=sizeof(struct sockaddr_in);
+		if((client_fd=accept(sockfd,(struct sockaddr*)&remote_addr,&sin_size))==-1)
+		{
+			perror("accept error");
+			continue;
+		}
+		printf("recv from : %s\n",inet_ntoa(remote_addr.sin_addr));
+		
+			if(send(client_fd,"connected \n",sizeof("connected \n"),0)==-1)
+				perror("send error");
+			close(client_fd);
+			exit(0);
+		
+		close(client_fd);
+	}
+}
+
+
+
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <errno.h>
+#include <sys/types.h>
+#include <unistd.h>
+int port=8888;
+int main()
+{
+	int sockfd;
+	int i=0;
+	int z;
+	char buf[80],str1[80];
+	struct sockaddr_in adr_srvr;
+	FILE * fp;
+	printf("open file.... \n");
+	fp=fopen("temp","r");
+	if(fp==NULL)
+	{
+		perror("open file failed");
+		exit(1);
+	}
+	printf("connect serv...\n");
+
+	adr_srvr.sin_family=AF_INET;
+	adr_srvr.sin_port=htons(port);
+	adr_srvr.sin_addr.s_addr=htonl(INADDR_ANY);
+	bzero(&(adr_srvr.sin_zero),8);
+	sockfd=socket(AF_INET,SOCK_DGRAM,0);
+	if(sockfd==-1)
+	{
+		perror("socket create failed");
+		exit(1);
+	}
+	printf("send file....\n");
+
+	for(i=0;i<3;i++)
+	{
+		fgets(str1,80,fp);
+		printf("%d:%s",i,str1);
+		sprintf(buf,"stop\n");
+		z=sendto(sockfd,buf,sizeof(buf),0,(struct sockaddr *)&adr_srvr,sizeof(adr_srvr));
+		if(z<0)
+		{
+			perror("recv from error");
+			exit(1);
+		}
+	}
+
+	printf("send.....\n");
+	sprintf(buf,"stop\n");
+	z=sendto(sockfd,buf,sizeof(buf),0,(struct sockaddr *)&adr_srvr,sizeof(adr_srvr));
+	if(z<0)
+	{
+		perror("sendto error\n");
+		exit(1);
+	}
+	fclose(fp);
+	close(sockfd);
+	exit(0);	
+}
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <errno.h>
+#include <unistd.h>
+#include <sys/types.h>
+int port=8888;
+int main()
+{
+	int sockfd;
+	int len;
+	int z;
+	char buf[256];
+	struct sockaddr_in adr_inet;
+	struct sockaddr_in adr_clnt;
+	printf("wait client...\n");
+
+	adr_inet.sin_family=AF_INET;
+	adr_inet.sin_port=htons(port);
+	adr_inet.sin_addr.s_addr=htonl(INADDR_ANY);
+	bzero(&(adr_inet.sin_zero),8);
+	len=sizeof(adr_clnt);
+
+	sockfd=socket(AF_INET,SOCK_DGRAM,0);
+	if(sockfd==-1)
+	{
+		perror("socket error");
+		exit(1);
+	}
+
+	z=bind(sockfd,(struct sockaddr *)&adr_inet,sizeof(adr_inet));
+	if(z==-1)
+	{
+		perror("bind error");
+		exit(1);
+	}
+	while(1)
+	{
+		z=recvfrom(sockfd,buf,sizeof(buf),0,(struct sockaddr*)&adr_clnt,&len);
+		if(z<0)
+		{
+			perror("recvfrom error");
+			exit(1);
+		}
+		buf[z]='\0';
+		printf("recv: %s",buf );
+		if(strncmp(buf,"stop",4)==0)
+		{
+			printf("end....\n");
+			break;
+		}
+	}
+	close(sockfd);
+	exit(0);
+}
