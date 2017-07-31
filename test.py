@@ -154,8 +154,143 @@ print callable('sdasd')
 '''
 
 ##type类不仅可以查询变量的类型而且还可以创建类
-
+'''
 def fn(self,name='world'):
     print name
 
-Hello=type('Hello',(object),dict(hello=fn))
+Hello=type('Hello',(object,),dict(hello=fn))
+
+
+
+##!!!!!!!!!metaclass
+
+
+class ListMetaClass(type):
+    def __new__(cls,name,bases,attrs):
+        attrs['add']=lambda self,value:self.append(value)
+        return type.__new__(cls,name,bases,attrs)
+
+class Mylist(list):
+    __metaclass__=ListMetaClass
+
+
+
+
+###ORM
+import logging
+logging.basicConfig(level=logging.INFO)
+s='0'
+n=int(s)
+logging.info('n=%d' %n)
+print 10/313
+'''
+'''
+from io import StringIO
+f=StringIO()
+f.write(u'hello')
+print f.getvalue()
+
+'''
+'''
+from io import StringIO
+f=StringIO(u'hello\n hi \n goodbye')
+print f.getvalue()
+while True:
+    a=f.readline()
+    if a=='':
+        break
+    print a.strip()
+'''
+'''
+from io import BytesIO
+f=BytesIO()
+f.write('zhognewn'.encode('utf-8'))
+print f.getvalue()
+
+from io import BytesIO
+f=BytesIO(b'\xe4\xb8\xad\xe6\x96\x87')
+#print f.readline()
+#print f.read()
+f.write(b'\xe4')
+print f.readline()
+'''
+
+'''
+import os
+print os.path.split('/users/michael/testdir/file.txt')
+print os.path.splitext('/a/b/v/d/file.txt')
+'''
+
+'''
+from multiprocessing import Pool
+import os,time,random
+def run(name):
+    print name
+
+if __name__=='__main__':
+    p=Pool(4)
+    for i in range(5):
+        print i
+        p.apply_async(run,args=(1,))
+    print '...'
+    p.close()
+    p.join()
+'''
+'''
+import subprocess
+print '$nslookup'
+p=subprocess.Popen(['nslookup'],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+output,err=p.communicate(b'set q=mx/npython.org\nexit\n')
+print output.decode('utf-8')
+print 'exit code',p.returncode
+'''
+'''
+print 1,2
+
+
+
+import subprocess
+p=subprocess.Popen(['ping','www.baidu.com'],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+output,err=p.communicate(b'www.baidu.com')
+print output
+print err
+#print 'exit code:  ',p.returncode()
+'''
+
+
+
+
+
+
+
+from multiprocessing import Process,Queue
+import time
+import random
+
+def write(q):
+    for value in [1,2,3]:
+        print 'write %s',value
+        q.put(value)
+        time.sleep(random.random())
+def read(q):
+    while True:
+        value=q.get(True)
+        print 'read %s',value
+
+if __name__=='__main__':
+    q=Queue()
+    pw=Process(target=write,args=(q,))
+    pr=Process(target=read,args=(q,))
+    pw.start()
+    pr.start()
+    pw.join()
+    pr.terminate()
+
+
+
+
+
+
+
+
+
