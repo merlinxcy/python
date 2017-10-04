@@ -262,7 +262,7 @@ print err
 
 
 
-
+'''
 from multiprocessing import Process,Queue
 import time
 import random
@@ -286,11 +286,97 @@ if __name__=='__main__':
     pw.join()
     pr.terminate()
 
+'''
 
+'''
+import urllib2
+response=urllib2.urlopen('http://www.baidu.com')
+responseData=response.read()
+httpcode=response.getcode()
 
+proxy_handle=urllib2.ProxyHandler(proxies={"http":"http://127.0.0.1:1080"})
+opener_handle=urllib2.build_opener(proxy_handle)
+urllib2.install_opener(opener_handle)
+response=urllib2.urlopen('http://www.google.com')
+httpcode=response.getcode()
+responseData=response.read()
+print httpcode
+print responseData
+'''
 
+'''
+import urllib2
+proxy_handle=urllib2.ProxyHandler(proxies={"http":"http://127.0.0.1:1080"})
+opener=urllib2.build_opener(proxy_handle)
+urllib2.install_opener(opener)
+response=urllib2.urlopen('http://www.google.cn')
+print response.read()
+print response.info()
+'''
 
+'''
+import urllib2
+headers={"Usedr-Agent":"new","Refer":"http://www.baidu.com"}
+req=urllib2.Request('http://www.baidu.com',headers=headers)
+response=urllib2.urlopen(req)
+#print response.read()
+print response.info()
+'''
 
+'''
+import requests
+import re
+import time
+headers={'User-Agent':'as'}
+r=requests.get('http://www.xicidaili.com/wt',headers=headers)
+page=r.content
+maxpage=re.findall(r'<a href="/wt/.*?">(.*?)</a>',page)
+#print maxpage.sort()
+maxpage=max(int(i) for i in maxpage)
+#print page
+#page="<td>1.1.1.11</td>sdsd<td>10.0.0.3</td>"
+#result=re.findall(r'<td>([0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3})</td>.*?<td>(.*?)</td>',page)    ????????????
+result=re.findall(r'<td>(.*?)</td>',page)
+proxylist=list()
+for i in range(0,len(result)/5):
+    ip=result[i*5]
+    port=result[i*5+1]
+    proxylist.append({ip:port})
+print proxylist
+print '11111111111'
+#print proxylist
+#print result
+if maxpage>1:
+    for i in range(2,10):
+        url='http://www.xicidaili.com/wt/'+str(i)
+        #time.sleep(2)
+        #print url
+        r=requests.get(url,headers=headers)
+        page=r.content
+        #print page
+        result=re.findall(r'<td>(.*?)</td>',page)
+        for i in range(0,len(result)/5):
+            ip=result[i*5]
+            port=result[i*5+1]
+            proxylist.append({ip:port})
+print proxylist
 
+'''
 
-
+'''
+from progressbar import ProgressBar
+import time
+pbar=ProgressBar(maxval=10)
+for i in pbar(range(100)):
+    time.sleep(0.02)
+pbar.finish()
+'''
+'''
+import progressbar
+import time
+bar=progressbar.ProgressBar(10)
+for i in bar(range(10)):
+    #print i
+    time.sleep(0.2)
+    bar.update(i)
+'''
