@@ -2,6 +2,7 @@
 <head>
 	<meta charset="utf-8">
 	<script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+	<script src='{{url_for('static',filename='Chart.min.js')}}'></script>
 	<script type="text/javascript">
 		 function ajaxForm() {  
                 $.ajax( {  
@@ -29,19 +30,89 @@
         	/*var data={
         		data: JSON.stringify({"session":"123"})
         	};*/
+        	var ajax_data="";
         	$.ajax(
         	{
+        		async:false,
         		url:"/",
         		type:'POST',
         		dataType:"json",
         		data:{"session":"123"},
-        		success:function(data){alert(222);},
+        		success:function(data){//alert(222);
+        			ajax_data=data;
+        			//alert(data.msg);
+        			//alert(data['']);
+        		},
         		error:function(){alert(112);}
         	});
+        	//alert(ajax_data);
+        	return ajax_data;
         }  
 	</script>
 </head>
 <body>
-	<button id='asd' onClick="ajax()">
+	<button id='asd' onClick="show()"></button>
 	<p id='name'></p>
+	<div style="width:300px;height:300px;">
+	<canvas id='mychart' width='100' height='100'></canvas>
+	</div>
+	<script type="text/javascript">
+		function show()
+		{
+			var ctx=document.getElementById('mychart').getContext('2d');
+			//var dat=ajax();
+			//alert(1);
+			//document.write(dat);
+			var myChart = new Chart(ctx, {
+			    type: 'horizontalBar',
+			    data: {
+			        labels: ["modbus", "iec61850", "http", "profinet", "profibus", "tcp"],
+			        datasets: [{
+			            label: '# of Votes',
+			            data: [12, 19, 3, 5, 2, 3],
+			            backgroundColor: [
+			                'rgba(255, 99, 132, 0.2)',
+			                'rgba(54, 162, 235, 0.2)',
+			                'rgba(255, 206, 86, 0.2)',
+			                'rgba(75, 192, 192, 0.2)',
+			                'rgba(153, 102, 255, 0.2)',
+			                'rgba(255, 159, 64, 0.2)'
+			            ],
+			            borderColor: [
+			                'rgba(255,99,132,1)',
+			                'rgba(54, 162, 235, 1)',
+			                'rgba(255, 206, 86, 1)',
+			                'rgba(75, 192, 192, 1)',
+			                'rgba(153, 102, 255, 1)',
+			                'rgba(255, 159, 64, 1)'
+			            ],
+			            borderWidth: 1
+			        }]
+			    },
+			    options: {
+			        scales: {
+			            yAxes: [{
+			                ticks: {
+			                    beginAtZero:true
+			                }
+			            }]
+			        }
+			    }
+			});
+		
+		
+		return myChart;
+		}
+		function bar_update(data,myChart){
+			var dat=ajax();
+			myChart.data.datasets[0].data[0]=dat.modbus;
+			myChart.update();
+			//return dat;
+		}
+		chart=show();
+		setInterval("bar_update(1,chart)",2000);
+		//setInterval("bar_update(2,chart)",2000);
+		
+		//document.write(dat.modbus);
+	</script>
 </body>

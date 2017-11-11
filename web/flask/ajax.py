@@ -1,4 +1,5 @@
 from flask import Flask,request,jsonify,render_template,json
+import random
 
 app=Flask(__name__)
 
@@ -15,7 +16,7 @@ def index():
 		#return "1"
 		#return jsonify('ok')
 		#return "1"
-		return jsonify({'msg': True})
+		return jsonify({'modbus': random.randint(1,100)})
 		#return Response(data=json.dumps({'ok': True}), mimetype='application/json')
 	else:
 		return jsonify(['msg','1'])
