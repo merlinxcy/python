@@ -1,0 +1,47 @@
+<html>
+<head>
+	<meta charset="utf-8">
+	<script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+	<script type="text/javascript">
+		 function ajaxForm() {  
+                $.ajax( {  
+                    type : "POST",  
+                    url : "http://127.0.0.1:7777/",  
+                    dataType : "json",  
+                    data : {  
+                        "first_name" : 1,  
+                        "last_name" : 2,   
+                    },  
+                    error: function( XMLResponse ) {  
+                    	alert(1);
+                        alert( XMLResponse.responseText )  
+                    },  
+                    success : function ( data, textStatus ) { 
+                    	alert(2);
+                    	document.write(data);
+                        $( "#name" ).text(data);                
+                    }  
+                } );  
+                return false;              
+            }
+        function ajax()
+        {
+        	/*var data={
+        		data: JSON.stringify({"session":"123"})
+        	};*/
+        	$.ajax(
+        	{
+        		url:"/",
+        		type:'POST',
+        		dataType:"json",
+        		data:{"session":"123"},
+        		success:function(data){alert(222);},
+        		error:function(){alert(112);}
+        	});
+        }  
+	</script>
+</head>
+<body>
+	<button id='asd' onClick="ajax()">
+	<p id='name'></p>
+</body>
